@@ -7,7 +7,8 @@ function App() {
   // https://randomuser.me/api/?results=20
   const [usersQuantity, setusersQuantity] = useState(20);
   const url = `https://randomuser.me/api/?results=${usersQuantity}`;
-  const [users, getUsers] = useFetch(url); //se esta desustructurado arreglos
+  const [users, hasError, isLoading, getUsers] = useFetch(url); //se esta desustructurado arreglos
+  const [messageError, setMessageError] = useState("");
 
   useEffect(() => {
     getUsers(); //esto va a quei por que asi soolo se eejcuta la funcion y no toda la pagina es para obtimizar
@@ -18,7 +19,13 @@ function App() {
   //se usa el map para correr los 20 compontes
   const handleSubmit = (e) => {
     e.preventDefault(); //para que al usar el form no se resetee la paginacompleta se desactiva
-    setusersQuantity(inputQuantity.current.value);
+
+    if (inputQuantity.current.value > 5000 || inputQuantity.current.value < 1) {
+      setMessageError("Choose a number from a 1 to 5000");
+    } else {
+      setusersQuantity(inputQuantity.current.value);
+      setMessageError("");
+    }
   };
 
   const inputQuantity = useRef();
@@ -31,13 +38,21 @@ function App() {
           ref={inputQuantity}
           type="number"
           placeholder="choose Quantity"
+          min={1} //valor minimo que se le permite hacer
+          defaultValue={usersQuantity}
+          // max={5000}
         />
         <button>Choose</button>
       </form>
-
-      {users?.results.map((user) => (
-        <UserCard key={user.login.uuid} user={user} />
-      ))}
+      {isLoading ? (
+        <h1>loagin.....</h1>
+      ) : messageError ? (
+        <h1>{messageError}</h1>
+      ) : (
+        users?.results.map((user) => (
+          <UserCard key={user.login.uuid} user={user} />
+        ))
+      )}
     </div>
   );
 }
